@@ -76,8 +76,13 @@ exports.clientPivotRefreshNight = (req, res) => {
     let pivotData = []
     let p1 = new Promise((resolve, reject) => {
         db.serialize(() => {
-            db.each(`SELECT person, pick_time
-                     FROM day_pivot Where pick_time >= '20:00' and pick_time <= '07:00' ORDER BY person ASC`, (err, row) => {
+            db.each(`SELECT * FROM (
+            SELECT * FROM day_pivot Where pick_time between '20:00' and '23:00' Order by pick_time ASC
+            ) a
+        UNION ALL
+    select * from (
+            SELECT * FROM day_pivot Where pick_time between '00:00' and '07:00' Order by pick_time ASC
+   )`, (err, row) => {
                 if (err) {
                     console.error(err.message);
                 }
