@@ -65,8 +65,8 @@ exports.clientPivotRefreshDay = (req, res) => {
             });
         });
     })
-   p1.then(values => {
-     resultPivot = values;
+    p1.then(values => {
+        resultPivot = values;
         res.send(resultPivot);
     })
 }
@@ -83,6 +83,27 @@ exports.clientPivotRefreshNight = (req, res) => {
     select * from (
             SELECT * FROM day_pivot Where pick_time between '00:00' and '07:00' Order by pick_time ASC
    )`, (err, row) => {
+                if (err) {
+                    console.error(err.message);
+                }
+                pivotData.push(row)
+                setTimeout(() => resolve(pivotData), 1000);
+            });
+        });
+    })
+    p1.then(values => {
+        result = values;
+        res.send(result);
+    })
+}
+
+
+exports.clientProgressMonitoring = (req, res) => {
+    let result = {}
+    let pivotData = []
+    let p1 = new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.each(`SELECT * FROM progress_monitoring`, (err, row) => {
                 if (err) {
                     console.error(err.message);
                 }
