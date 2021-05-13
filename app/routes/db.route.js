@@ -103,7 +103,20 @@ exports.clientProgressMonitoring = (req, res) => {
     let pivotData = []
     let p1 = new Promise((resolve, reject) => {
         db.serialize(() => {
-            db.each(`SELECT * FROM progress_monitoring`, (err, row) => {
+            db.each(`SELECT [Picking Consol No.] AS [Con No],
+       [PGI Datetime],
+       [Number of Tasks] AS Total,
+       [To Be Picked],
+       [To Be Consolidated] AS [To Be Consol],
+       [Mezzanine ULD] AS Mezz,
+       [HVA ULD] AS HVA,
+       [Final ULD] AS Rack,
+       (CASE WHEN [To Be Picked] = 0 AND 
+                  [To Be Consolidated] = 0 THEN 'All Consoled' WHEN [To Be Picked] != 0 AND 
+                  [To Be Consolidated] != 0 OR 
+                  [To Be Consolidated] = 0 THEN 'Progress' WHEN [To Be Picked] = 0 AND 
+                  [To Be Consolidated] != 0 THEN 'All Picked' END) AS Status
+  FROM progress_monitoring`, (err, row) => {
                 if (err) {
                     console.error(err.message);
                 }
