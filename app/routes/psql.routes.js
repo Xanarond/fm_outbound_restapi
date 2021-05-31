@@ -2,43 +2,37 @@ const { Client } = require("pg");
 const env = require("../config/psql_config");
 
 exports.getPackingShifts = (req, res) => {
-  try {
-    let st_arr = req.query.start.split("-");
-    let start_result = st_arr[2] + "." + st_arr[1] + "." + st_arr[0];
+  const conn = `postgres://${env.username}:${env.password}@${env.host}/${env.database}`;
+  let result = {};
+  let total = [];
+  let p1 = new Promise((resolve, reject) => {
+    try {
+      let st_arr = req.query.period.split("-");
+      let result_per = st_arr[2] + "." + st_arr[1] + "." + st_arr[0];
 
-    let en_arr = req.query.end.split("-");
-    let end_result = en_arr[2] + "." + en_arr[1] + "." + en_arr[0];
-    console.log(start_result, end_result);
+      console.log(result_per);
 
-    const client = new Client(env);
-    client.connect();
-    let sql_req = `SELECT * from "public".packing_shifts WHERE pack_date between ${start_result} and ${end_result}`;
-    client.query(sql_req, (err, result) => {
-      if (err) {
-        console.log(err.stack);
-      } else {
-        console.log(result.rows[0]);
-        res.send(result);
-      }
-    });
-    // res.send(result); // Hello world!
-    client.end();
-  } catch (e) {
-    return e;
-  }
+      const client = new Client({ connectionString: conn });
+      client.connect();
 
-  /*let p1 = new Promise((resolve, reject) => {
-    let total = [];
-    let result = {};
-    let sql_req = `SELECT * from "public".packing_shifts WHERE pack_date between ${start_result} and ${end_result}`;
-    let query = client.query(sql_req);
-    query.on(row => console.log(row));
-    setTimeout(() => resolve(total), 1000);
+      let sql_req = `SELECT * from "public".packing_shifts WHERE pack_date ='${result_per}'`;
+      client.query(sql_req, (err, result) => {
+        if (err) {
+          console.log(err.stack);
+        } else {
+          console.log(result.rows);
+          total.push(result.rows);
+        }
+      });
+      setTimeout(() => resolve(total), 1000);
+    } catch (e) {
+      console.log(e);
+    }
   });
   p1.then(values => {
     result = values;
     res.send(result);
   }).catch(e => {
-    return e === "Нет ответа от сервера";
-  });*/
+    console.log(e, "Нет ответа от сервера");
+  });
 };

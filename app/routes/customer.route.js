@@ -1,7 +1,7 @@
 const clientDB = require("./db.route");
 const psqlDB = require("./psql.routes");
 
-module.exports = function(app) {
+module.exports = app => {
   app.get("/api/refreshDB", clientDB.clientDBRefresh);
   app.get("/api/refreshPivotDay", clientDB.clientPivotRefreshDay);
   app.get("/api/refreshPivotNight", clientDB.clientPivotRefreshNight);

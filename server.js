@@ -15,7 +15,7 @@ app.use(cors(corsOptions));
 require("./app/routes/customer.route")(app);
 
 // Create a Server
-const server = app.listen(8081, function() {
+const server = app.listen(8081, () => {
   const host = server.address().address;
   const port = server.address().port;
 
