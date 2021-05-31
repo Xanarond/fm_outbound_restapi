@@ -1,16 +1,16 @@
 const sqlite3 = require("sqlite3").verbose();
 
-let db = new sqlite3.Database("outm_db", err => {
+const db = new sqlite3.Database("outm_db", err => {
   if (err) {
     return console.error(err.message);
   }
-  console.log("Connected to the in-memory SQlite database.");
+  return console.log("Connected to the in-memory SQlite database.");
 });
 
 exports.clientDBRefresh = (req, res) => {
-  let result = {};
-  let statusData = [];
-  let p1 = new Promise((resolve, reject) => {
+  const result = {};
+  const statusData = [];
+  const p1 = new Promise((resolve, reject) => {
     db.parallelize(() => {
       db.each(
         `SELECT time, result
@@ -21,13 +21,14 @@ exports.clientDBRefresh = (req, res) => {
           }
           statusData.push(row);
           setTimeout(() => resolve(statusData), 100);
+          setTimeout(() => reject(new Error("Something went wrong!")), 1000);
           // console.log(row.time + "\t" + row.result);
-        }
+        },
       );
     });
   });
-  let shiftResp = [];
-  let p2 = new Promise((resolve, reject) => {
+  const shiftResp = [];
+  const p2 = new Promise((resolve, reject) => {
     db.parallelize(() => {
       db.each(
         `SELECT id, name, shift
@@ -39,26 +40,27 @@ exports.clientDBRefresh = (req, res) => {
           }
           shiftResp.push(row);
           setTimeout(() => resolve(shiftResp), 100);
+          setTimeout(() => reject(new Error("Something went wrong!")), 1000);
           // console.log(row.id + "\t" + row.name + "\t" + row.shift);
-        }
+        },
       );
     });
   });
 
   Promise.all([
-    p1, //передача данных для target
-    p2 // ответственные на смену
-  ]).then(values => {
-    result.shift_stat = values[0];
-    result.persons = values[1];
+    p1, // передача данных для target
+    p2, // ответственные на смену
+  ]).then(([firstp, secondp]) => {
+    result.shift_stat = firstp;
+    result.persons = secondp;
     res.send(result);
   });
 };
 
 exports.clientPivotRefreshDay = (req, res) => {
   let resultPivot = {};
-  let pivotData = [];
-  let p1 = new Promise((resolve, reject) => {
+  const pivotData = [];
+  const p1 = new Promise((resolve, reject) => {
     db.serialize(() => {
       db.each(
         `SELECT person, pick_time
@@ -69,7 +71,8 @@ exports.clientPivotRefreshDay = (req, res) => {
           }
           pivotData.push(row);
           setTimeout(() => resolve(pivotData), 1000);
-        }
+          setTimeout(() => reject(new Error("Something went wrong!")), 1000);
+        },
       );
     });
   });
@@ -81,8 +84,8 @@ exports.clientPivotRefreshDay = (req, res) => {
 
 exports.clientPivotRefreshNight = (req, res) => {
   let result = {};
-  let pivotData = [];
-  let p1 = new Promise((resolve, reject) => {
+  const pivotData = [];
+  const p1 = new Promise((resolve, reject) => {
     db.serialize(() => {
       db.each(
         `SELECT * FROM (
@@ -98,7 +101,8 @@ exports.clientPivotRefreshNight = (req, res) => {
           }
           pivotData.push(row);
           setTimeout(() => resolve(pivotData), 1000);
-        }
+          setTimeout(() => reject(new Error("Something went wrong!")), 1000);
+        },
       );
     });
   });
@@ -110,8 +114,8 @@ exports.clientPivotRefreshNight = (req, res) => {
 
 exports.clientProgressMonitoring = (req, res) => {
   let result = {};
-  let pivotData = [];
-  let p1 = new Promise((resolve, reject) => {
+  const pivotData = [];
+  const p1 = new Promise((resolve, reject) => {
     db.serialize(() => {
       db.each(
         `SELECT [Picking Consol No.] AS [Con No],
@@ -136,7 +140,8 @@ exports.clientProgressMonitoring = (req, res) => {
           }
           pivotData.push(row);
           setTimeout(() => resolve(pivotData), 1000);
-        }
+          setTimeout(() => reject(new Error("Something went wrong!")), 1000);
+        },
       );
     });
   });

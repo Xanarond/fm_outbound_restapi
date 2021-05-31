@@ -1,7 +1,7 @@
 {
-  "name": "vue-nodejs-restapis-mysql",
+  "name": "vue-nodejs",
   "version": "1.0.0",
-  "description": "Nodejs-Rest-APIs-Sequelize-MySQL",
+  "description": "Nodejs-Rest-APIs",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,11 +9,11 @@
   "keywords": [
     "Nodejs",
     "RestAPIs",
-    "Sequelize",
-    "MySQL",
+    "SQLite",
+    "PostgreSQL",
     "Vue.js"
   ],
-  "author": "grokonez.com",
+  "author": "vlakost",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -24,5 +24,16 @@
     "pg": "^8.6.0",
     "sequelize": "^4.42.0",
     "sqlite3": "^5.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^7.27.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-es": "^4.1.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-requirejs": "^4.0.1",
+    "eslint-plugin-sql": "^1.2.0",
+    "prettier": "^2.3.0"
   }
 }
