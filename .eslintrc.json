@@ -20,6 +20,8 @@
     "no-shadow": "warn",
     "max-len": "warn",
     "quotes": "off",
-    "arrow-parens": "off"
+    "arrow-parens": "off",
+    "no-return-assign": "off",
+    "no-plusplus": "off"
   }
 }
