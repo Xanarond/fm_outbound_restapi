@@ -7,4 +7,6 @@ module.exports = app => {
   app.get("/api/refreshPivotNight", clientDB.clientPivotRefreshNight);
   app.get("/api/refreshProgress", clientDB.clientProgressMonitoring);
   app.get("/api/getPackingShifts", psqlDB.getPackingShifts);
+  app.get("/api/getPivotRefreshDayShift", psqlDB.clientPivotRefreshDayShift);
+  app.get("/api/getPivotRefreshNightShift", psqlDB.clientPivotRefreshNightShift);
 };
