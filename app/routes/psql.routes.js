@@ -2,6 +2,12 @@ const { Client } = require("pg");
 const env = require("../config/psql_config");
 
 const conn = `postgres://${env.username}:${env.password}@${env.host}/${env.database}`; // connection config
+const client = new Client({
+  connectionString: conn,
+  idle_in_transaction_session_timeout: 3000,
+  query_timeout: 300,
+});
+client.connect();
 /**
  * @param req date
  * @param res array of data for the period
@@ -16,9 +22,6 @@ exports.getPackingShifts = (req, res) => {
       const result_per = `${st_arr[2]}.${st_arr[1]}.${st_arr[0]}`; // formatting date to required format
 
       console.log(result_per);
-
-      const client = new Client({ connectionString: conn }); // instance of connection PostgreSQL
-      client.connect();
 
       const sql_req = `SELECT Distinct pack_time, result from "public".packing_shifts WHERE pack_date ='${result_per}' and pack_time <='19:00:00' `;
       client.query(sql_req, (err, result) => (err
@@ -39,9 +42,6 @@ exports.getPackingShifts = (req, res) => {
       const result_per = `${st_arr[2]}.${st_arr[1]}.${st_arr[0]}`; // formatting date to required format
 
       console.log(result_per);
-
-      const client = new Client({ connectionString: conn }); // instance of connection PostgreSQL
-      client.connect();
 
       const sql_req = `SELECT Distinct pack_time, result from "public".packing_shifts WHERE pack_date ='${result_per}' and pack_time between '20:00:00' and '23:00:00'`;
       client.query(sql_req, (err, result) => (err
@@ -76,9 +76,6 @@ exports.clientPivotRefreshDayShift = (req, res) => {
 
       console.log(result_per);
 
-      const client = new Client({ connectionString: conn }); // instance of connection PostgreSQL
-      client.connect();
-
       const sql_req = `SELECT worker, pick_time from picking_shifts WHERE pick_date ='${result_per}' and pick_time >= '08:00:00' and pick_time <= '19:00:00'`;
       client.query(sql_req, (err, result) => (err
         ? console.log(err.stack)
@@ -111,9 +108,6 @@ exports.clientPivotRefreshNightShift = (req, res) => {
 
       const st_arr_past = req.query.past_date.split("-");
       const result_per_past = `${st_arr_past[2]}.${st_arr_past[1]}.${st_arr_past[0]}`; // formatting date to required format
-
-      const client = new Client({ connectionString: conn }); // instance of connection PostgreSQL
-      client.connect();
 
       const sql_req = `SELECT worker, pick_time from picking_shifts WHERE pick_date ='${result_per_cur}' and pick_time between '00:00:00' and '07:00:00'
       union all 
