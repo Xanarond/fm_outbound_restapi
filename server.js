@@ -1,4 +1,6 @@
 const express = require("express");
+const fs = require("fs");
+const https = require("https");
 
 const app = express();
 const bodyParser = require("body-parser");
@@ -8,14 +10,22 @@ app.use(bodyParser.json());
 const cors = require("cors");
 
 const corsOptions = {
-  origin: "http://192.168.120.99:8080",
+  origin: "*",
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 
-// force: true will drop the table if it already exists
-
 require("./app/routes/customer.route")(app);
+
+const httpsOptions = {
+  key: fs.readFileSync("./ssl/server.key"), // путь к ключу
+  cert: fs.readFileSync("./ssl/server.crt"), // путь к сертификату
+};
+
+const ssl_server = https.createServer(httpsOptions, app).listen(8443, () => {
+  const { port } = ssl_server.address();
+  console.log("App listening the", port);
+});
 
 // Create a Server
 const server = app.listen(8081, () => {

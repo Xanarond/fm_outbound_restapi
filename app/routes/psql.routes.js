@@ -101,7 +101,7 @@ exports.clientPivotRefreshDayShift = (req, res) => {
 exports.clientPivotRefreshNightShift = (req, res) => {
   let picking_night = {};
   const pastDateresult = [];
-  const p2 = new Promise((resolve, reject) => {
+  const p1 = new Promise((resolve, reject) => {
     try {
       const st_arr_cur = req.query.cur_date.split("-");
       const result_per_cur = `${st_arr_cur[2]}.${st_arr_cur[1]}.${st_arr_cur[0]}`; // formatting date to required format
@@ -122,10 +122,188 @@ exports.clientPivotRefreshNightShift = (req, res) => {
       console.log(e);
     }
   });
-  p2.then(values => {
+  p1.then(values => {
     picking_night = values;
     console.log(picking_night.flat(2));
     res.send(picking_night.flat(2));
+  })
+    .catch((e) => {
+      console.log(e, "No response from the server");
+    });
+};
+
+exports.clientProgressMonitoring = (req, res) => {
+  let progress_monitoring = {};
+  const progress_buff = [];
+  const p1 = new Promise((resolve, reject) => {
+    try {
+      const sql_req = `SELECT "Picking Consol No." as "Con No", "PGI Datetime", "Number of Tasks" as "Total", "To Be Picked", "To Be Consolidated" as "To Be Consol", "Mezzanine ULD" as "Mezz", "HVA ULD" as "HVA", "Final ULD" as "Rack", "Packing Status", "Manifest Packing Status",
+        (CASE
+            WHEN "To Be Picked" = '0'
+            AND "To Be Consolidated" = '0' THEN 'All Consoled'
+            WHEN "To Be Picked" != '0' AND
+            "To Be Consolidated" != '0' OR
+            "To Be Consolidated" = '0' THEN 'Progress' WHEN "To Be Picked" = '0' AND
+            "To Be Consolidated" != '0' THEN 'All Picked' END) as "Status"
+            FROM "public".progress_monitoring`;
+      client.query(sql_req, (err, result) => (err
+        ? console.log(err.stack)
+        : progress_buff.push(result.rows)));
+
+      setTimeout(() => resolve(progress_buff), 500); // add timeout for load data
+      setTimeout(() => reject(new Error("Something went wrong!")), 500);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  p1.then(values => {
+    progress_monitoring = values;
+    console.log(progress_monitoring);
+    res.send(progress_monitoring);
+  })
+    .catch((e) => {
+      console.log(e, "No response from the server");
+    });
+};
+
+exports.clientMLStatus = (req, res) => {
+  const ml_status = {};
+
+  const man_norm = [];
+  const st_arr = req.query.cur_date.split("-");
+  const result_per = `${st_arr[2]}.${st_arr[1]}.${st_arr[0]}`;
+  const p1 = new Promise((resolve, reject) => {
+    try {
+      const sql_req = `SELECT "Completed", "Not Packed", "In Progress" FROM "public"."Manifest_Normal" Where "Date" = '${result_per}'`;
+      client.query(sql_req, (err, result) => (err
+        ? console.log(err.stack)
+        : man_norm.push(result.rows)));
+
+      setTimeout(() => resolve(man_norm), 500); // add timeout for load data
+      setTimeout(() => reject(new Error("Something went wrong!")), 500);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+
+  const man_urg = [];
+  const p2 = new Promise((resolve, reject) => {
+    try {
+      const sql_req = `SELECT "Completed", "Not Packed", "In Progress" FROM "public"."Manifest_Urgent" Where "Date" = '${result_per}'`;
+      client.query(sql_req, (err, result) => (err
+        ? console.log(err.stack)
+        : man_urg.push(result.rows)));
+
+      setTimeout(() => resolve(man_urg), 500); // add timeout for load data
+      setTimeout(() => reject(new Error("Something went wrong!")), 500);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  const line_norm = [];
+  const p3 = new Promise((resolve, reject) => {
+    try {
+      const sql_req = `SELECT "Completed", "Not Packed", "In Progress" FROM "public"."Lines_Normal" Where "Date" = '${result_per}'`;
+      client.query(sql_req, (err, result) => (err
+        ? console.log(err.stack)
+        : line_norm.push(result.rows)));
+
+      setTimeout(() => resolve(line_norm), 500); // add timeout for load data
+      setTimeout(() => reject(new Error("Something went wrong!")), 500);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  const line_urgent = [];
+  const p4 = new Promise((resolve, reject) => {
+    try {
+      const sql_req = `SELECT "Completed", "Not Packed", "In Progress" FROM "public"."Lines_Urgent" Where "Date" = '${result_per}'`;
+      client.query(sql_req, (err, result) => (err
+        ? console.log(err.stack)
+        : line_urgent.push(result.rows)));
+
+      setTimeout(() => resolve(line_urgent), 500); // add timeout for load data
+      setTimeout(() => reject(new Error("Something went wrong!")), 500);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  Promise.all([
+    p1, // normal manifests
+    p2, // urgent manifests
+    p3, // normal lines
+    p4, // urgent lines
+  ])
+    .then(([firstp, secondp, thirdp, forthp]) => {
+      ml_status.man_normal = firstp.flat();
+      ml_status.man_urgent = secondp.flat();
+      ml_status.line_norm = thirdp.flat();
+      ml_status.line_urgent = forthp.flat();
+      res.send(ml_status);
+    })
+    .catch((e) => {
+      console.log(e, "No response from the server");
+    });
+};
+
+exports.clientPivotNotPicked = (req, res) => {
+  let not_picked = {};
+  const cur_not_picked = [];
+  const p1 = new Promise((resolve, reject) => {
+    try {
+      const st_arr = req.query.cur_date.split("-");
+      const result_per = `${st_arr[2]}.${st_arr[1]}.${st_arr[0]}`; // formatting date to required format
+
+      console.log(result_per);
+
+      const sql_req = `SELECT "PGI", "B01", "B03-04", "B16-18", "DUMMY", "ENT", "HVA", "MEZ", "TOF" FROM "Not_Picked" WHERE "PGI" like '${result_per}%'`;
+      client.query(sql_req, (err, result) => (err
+        ? console.log(err.stack)
+        : cur_not_picked.push(result.rows)));
+
+      setTimeout(() => resolve(cur_not_picked), 500); // add timeout for load data
+      setTimeout(() => reject(new Error("Something went wrong!")), 500);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  p1.then(values => {
+    not_picked = values;
+    console.log(not_picked.flat(2));
+    console.log(values);
+    res.send(not_picked.flat(2));
+  })
+    .catch((e) => {
+      console.log(e, "No response from the server");
+    });
+};
+
+exports.ClientPivotPickTask = (req, res) => {
+  let pick_task = {};
+  const cur_pick = [];
+  const p1 = new Promise((resolve, reject) => {
+    try {
+      const st_arr = req.query.cur_date.split("-");
+      const result_per = `${st_arr[2]}.${st_arr[1]}.${st_arr[0]}`; // formatting date to required format
+
+      console.log(result_per);
+
+      const sql_req = `SELECT "Operation Area Code", "Number of Pick Task", "Not Picked", "Pick Consolidated", Concat("Progress", '%') as "Progress" FROM "Pick_Task" WHERE "Date" = '${result_per}'`;
+      client.query(sql_req, (err, result) => (err
+        ? console.log(err.stack)
+        : cur_pick.push(result.rows)));
+
+      setTimeout(() => resolve(cur_pick), 500); // add timeout for load data
+      setTimeout(() => reject(new Error("Something went wrong!")), 500);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  p1.then(values => {
+    pick_task = values;
+    console.log(pick_task.flat(2));
+    console.log(values);
+    res.send(pick_task.flat(2));
   })
     .catch((e) => {
       console.log(e, "No response from the server");

@@ -1,0 +1,18 @@
+version: '3.7'
+
+services:
+  nodejs_restapi:
+    image: node:14-alpine
+    hostname: fm_nodejs_restapi_backend
+    container_name: fm_nodejs_restapi_backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /home/server
+    volumes:
+      - . :/home/server
+    command:
+      - yarn
+      - nodemon server.js
+    ports:
+      - 8081:8081
