@@ -288,7 +288,7 @@ exports.ClientPivotPickTask = (req, res) => {
 
       console.log(result_per);
 
-      const sql_req = `SELECT "Operation Area Code", "Number of Pick Task", "Not Picked", "Pick Consolidated", Concat("Progress", '%') as "Progress" FROM "Pick_Task" WHERE "Date" = '${result_per}'`;
+      const sql_req = `SELECT "Operation Area Code", "Number of Pick Task", "Not Picked", "Pick Consolidated", "Not Pick Consolidated", Concat("Progress", '%') as "Progress" FROM "Pick_Task" WHERE "Date" = '${result_per}'`;
       client.query(sql_req, (err, result) => (err
         ? console.log(err.stack)
         : cur_pick.push(result.rows)));
