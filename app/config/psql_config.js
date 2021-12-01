@@ -1,7 +1,7 @@
 const env = {
-  database: "outm_db",
-  username: "postgres",
-  password: "3@11ad",
+  database: "dashb",
+  username: "admin",
+  password: "2021",
   host: "localhost",
   dialect: "postgres",
 };
