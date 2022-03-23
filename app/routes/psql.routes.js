@@ -5,7 +5,7 @@ const conn = `postgres://${env.username}:${env.password}@${env.host}/${env.datab
 const client = new Client({
   connectionString: conn,
   idle_in_transaction_session_timeout: 3000,
-  query_timeout: 300,
+  // query_timeout: 300,
 });
 client.connect();
 /**
@@ -21,8 +21,8 @@ exports.getPackingShifts = (req, res) => {
       const st_arr = req.query.cur_date.split("-");
       const result_per = `${st_arr[2]}.${st_arr[1]}.${st_arr[0]}`; // formatting date to required format
 
-      console.log(result_per);
-
+      // console.log(result_per);
+      //
       const sql_req = `SELECT Distinct pack_time, result from "public".packing_shifts WHERE pack_date ='${result_per}' and pack_time <='19:00:00' `;
       client.query(sql_req, (err, result) => (err
         ? console.log(err.stack)
@@ -41,7 +41,7 @@ exports.getPackingShifts = (req, res) => {
       const st_arr = req.query.past_date.split("-");
       const result_per = `${st_arr[2]}.${st_arr[1]}.${st_arr[0]}`; // formatting date to required format
 
-      console.log(result_per);
+      // console.log(result_per);
 
       const sql_req = `SELECT Distinct pack_time, result from "public".packing_shifts WHERE pack_date ='${result_per}' and pack_time between '20:00:00' and '23:00:00'`;
       client.query(sql_req, (err, result) => (err
@@ -58,7 +58,7 @@ exports.getPackingShifts = (req, res) => {
     .then(([firstp, secondp]) => {
       all_result.cur_date = firstp;
       all_result.past_date = secondp;
-      console.log(all_result.cur_date, all_result.past_date);
+      // console.log(all_result.cur_date, all_result.past_date);
       res.send(all_result);
     })
     .catch((e) => {
@@ -89,8 +89,8 @@ exports.clientPivotRefreshDayShift = (req, res) => {
   });
   p1.then(values => {
     picking_day = values;
-    console.log(picking_day.flat(2));
-    console.log(values);
+    /* console.log(picking_day.flat(2));
+        console.log(values); */
     res.send(picking_day.flat(2));
   })
     .catch((e) => {
@@ -124,7 +124,7 @@ exports.clientPivotRefreshNightShift = (req, res) => {
   });
   p1.then(values => {
     picking_night = values;
-    console.log(picking_night.flat(2));
+    // console.log(picking_night.flat(2));
     res.send(picking_night.flat(2));
   })
     .catch((e) => {
@@ -158,89 +158,9 @@ exports.clientProgressMonitoring = (req, res) => {
   });
   p1.then(values => {
     progress_monitoring = values;
-    console.log(progress_monitoring);
+    // console.log(progress_monitoring);
     res.send(progress_monitoring);
   })
-    .catch((e) => {
-      console.log(e, "No response from the server");
-    });
-};
-
-exports.clientMLStatus = (req, res) => {
-  const ml_status = {};
-
-  const man_norm = [];
-  const st_arr = req.query.cur_date.split("-");
-  const result_per = `${st_arr[2]}.${st_arr[1]}.${st_arr[0]}`;
-  const p1 = new Promise((resolve, reject) => {
-    try {
-      const sql_req = `SELECT "Completed", "Not Packed", "In Progress" FROM "public"."Manifest_Normal" Where "Date" = '${result_per}'`;
-      client.query(sql_req, (err, result) => (err
-        ? console.log(err.stack)
-        : man_norm.push(result.rows)));
-
-      setTimeout(() => resolve(man_norm), 500); // add timeout for load data
-      setTimeout(() => reject(new Error("Something went wrong!")), 500);
-    } catch (e) {
-      console.log(e);
-    }
-  });
-
-  const man_urg = [];
-  const p2 = new Promise((resolve, reject) => {
-    try {
-      const sql_req = `SELECT "Completed", "Not Packed", "In Progress" FROM "public"."Manifest_Urgent" Where "Date" = '${result_per}'`;
-      client.query(sql_req, (err, result) => (err
-        ? console.log(err.stack)
-        : man_urg.push(result.rows)));
-
-      setTimeout(() => resolve(man_urg), 500); // add timeout for load data
-      setTimeout(() => reject(new Error("Something went wrong!")), 500);
-    } catch (e) {
-      console.log(e);
-    }
-  });
-  const line_norm = [];
-  const p3 = new Promise((resolve, reject) => {
-    try {
-      const sql_req = `SELECT "Completed", "Not Packed", "In Progress" FROM "public"."Lines_Normal" Where "Date" = '${result_per}'`;
-      client.query(sql_req, (err, result) => (err
-        ? console.log(err.stack)
-        : line_norm.push(result.rows)));
-
-      setTimeout(() => resolve(line_norm), 500); // add timeout for load data
-      setTimeout(() => reject(new Error("Something went wrong!")), 500);
-    } catch (e) {
-      console.log(e);
-    }
-  });
-  const line_urgent = [];
-  const p4 = new Promise((resolve, reject) => {
-    try {
-      const sql_req = `SELECT "Completed", "Not Packed", "In Progress" FROM "public"."Lines_Urgent" Where "Date" = '${result_per}'`;
-      client.query(sql_req, (err, result) => (err
-        ? console.log(err.stack)
-        : line_urgent.push(result.rows)));
-
-      setTimeout(() => resolve(line_urgent), 500); // add timeout for load data
-      setTimeout(() => reject(new Error("Something went wrong!")), 500);
-    } catch (e) {
-      console.log(e);
-    }
-  });
-  Promise.all([
-    p1, // normal manifests
-    p2, // urgent manifests
-    p3, // normal lines
-    p4, // urgent lines
-  ])
-    .then(([firstp, secondp, thirdp, forthp]) => {
-      ml_status.man_normal = firstp.flat();
-      ml_status.man_urgent = secondp.flat();
-      ml_status.line_norm = thirdp.flat();
-      ml_status.line_urgent = forthp.flat();
-      res.send(ml_status);
-    })
     .catch((e) => {
       console.log(e, "No response from the server");
     });
@@ -254,7 +174,7 @@ exports.clientPivotNotPicked = (req, res) => {
       const st_arr = req.query.cur_date.split("-");
       const result_per = `${st_arr[2]}.${st_arr[1]}.${st_arr[0]}`; // formatting date to required format
 
-      console.log(result_per);
+      // console.log(result_per);
 
       const sql_req = `SELECT "PGI", "B01", "B03-04", "B16-18", "DUMMY", "ENT", "HVA", "MEZ", "TOF" FROM "Not_Picked" WHERE "PGI" like '${result_per}%'`;
       client.query(sql_req, (err, result) => (err
@@ -269,8 +189,8 @@ exports.clientPivotNotPicked = (req, res) => {
   });
   p1.then(values => {
     not_picked = values;
-    console.log(not_picked.flat(2));
-    console.log(values);
+    /* console.log(not_picked.flat(2));
+        console.log(values); */
     res.send(not_picked.flat(2));
   })
     .catch((e) => {
@@ -301,9 +221,38 @@ exports.ClientPivotPickTask = (req, res) => {
   });
   p1.then(values => {
     pick_task = values;
-    console.log(pick_task.flat(2));
-    console.log(values);
+    /* console.log(pick_task.flat(2));
+        console.log(values); */
     res.send(pick_task.flat(2));
+  })
+    .catch((e) => {
+      console.log(e, "No response from the server");
+    });
+};
+
+exports.clientInboundDashboard = (req, res) => {
+  let Inbound = {};
+  const cur_inb = [];
+  const p1 = new Promise((resolve, reject) => {
+    try {
+      // console.log(result_per);
+
+      const sql_req = `SELECT "Num", type_postavki, plan_date, nomer_truck, status, date_startunload, time_startunload, time_endunload, nomer_postavki FROM public.rninbound`;
+      client.query(sql_req, (err, result) => (err
+        ? console.log(err.stack)
+        : cur_inb.push(result.rows)));
+
+      setTimeout(() => resolve(cur_inb), 500); // add timeout for load data
+      setTimeout(() => reject(new Error("Something went wrong!")), 500);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  p1.then(values => {
+    Inbound = values;
+    /* console.log(pick_task.flat(2));
+            console.log(values); */
+    res.send(Inbound.flat(2));
   })
     .catch((e) => {
       console.log(e, "No response from the server");
