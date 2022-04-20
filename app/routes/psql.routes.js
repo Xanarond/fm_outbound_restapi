@@ -237,7 +237,7 @@ exports.clientInboundDashboard = (req, res) => {
     try {
       // console.log(result_per);
 
-      const sql_req = `SELECT "Num", type_postavki, plan_date, nomer_truck, status, date_startunload, time_startunload, time_endunload, nomer_postavki FROM public.rninbound`;
+      const sql_req = `SELECT client, type_postavki, normativ_v, plan_prihoda, nomer_truck, status, unload_do, Concat(arrival_date, ' ', arrival_time) as arrival_datetime, Concat(start_unl_date, ' ', start_unl_time) as start_unl_datetime, Concat(start_unl_date, ' ', finish_unl_time) as fin_unl_datetime, grade, nomer_postavki FROM public."Inbound"`;
       client.query(sql_req, (err, result) => (err
         ? console.log(err.stack)
         : cur_inb.push(result.rows)));
