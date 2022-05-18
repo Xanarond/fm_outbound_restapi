@@ -9,6 +9,8 @@ module.exports = app => {
   // app.get("/api/getPackingShifts", psqlDB.getPackingShifts);
   app.get("/api/getPivotRefreshDayShift", psqlDB.clientPivotRefreshDayShift);
   app.get("/api/getPivotRefreshNightShift", psqlDB.clientPivotRefreshNightShift);
+  app.get("/api/getStockRefresh", psqlDB.clientStockRefresh);
+  app.get("/api/getStockPercent", psqlDB.clientStockPercent);
   // app.get("/api/getProgressMonitor", psqlDB.clientProgressMonitoring);
   // app.get("/api/getMLStatus", psqlDB.clientMLStatus);
   // app.get("/api/getPivotNotPicked", psqlDB.clientPivotNotPicked);

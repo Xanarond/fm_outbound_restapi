@@ -23,5 +23,6 @@
     "arrow-parens": "off",
     "no-return-assign": "off",
     "no-plusplus": "off"
-  }
+  },
+  "ignorePatterns": ["../"]
 }

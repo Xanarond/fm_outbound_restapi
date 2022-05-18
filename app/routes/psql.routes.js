@@ -77,3 +77,53 @@ exports.clientPivotRefreshNightShift = (req, res) => {
       console.log(e, "No response from the server");
     });
 };
+
+exports.clientStockRefresh = (req, res) => {
+  let stockTotal = {};
+  const resultProduct = [];
+  const p1 = new Promise((resolve, reject) => {
+    try {
+      const sql_req = `SELECT "TV", "AUDIO", "MON", "AC", "REF", "WM", "VC", "MWO" FROM public.product_volume;`;
+      client.query(sql_req, (err, result) => (err
+        ? console.log(err.stack)
+        : resultProduct.push(result.rows)));
+
+      setTimeout(() => resolve(resultProduct), 500); // add timeout for load data
+      setTimeout(() => reject(new Error("Something went wrong!")), 500);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  p1.then(values => {
+    stockTotal = values;
+    res.send(stockTotal.flat(2));
+  })
+    .catch((e) => {
+      console.log(e, "No response from the server");
+    });
+};
+
+exports.clientStockPercent = (req, res) => {
+  let stockPercent = {};
+  const resultPercent = [];
+  const p1 = new Promise((resolve, reject) => {
+    try {
+      const sql_req = `SELECT total, "A", "B", "C" FROM public."WH_volume";`;
+      client.query(sql_req, (err, result) => (err
+        ? console.log(err.stack)
+        : resultPercent.push(result.rows)));
+
+      setTimeout(() => resolve(resultPercent), 500); // add timeout for load data
+      setTimeout(() => reject(new Error("Something went wrong!")), 500);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  p1.then(values => {
+    stockPercent = values;
+    res.send(stockPercent.flat(2));
+  })
+    .catch((e) => {
+      console.log(e, "No response from the server");
+    });
+};
